@@ -14,6 +14,8 @@ class ViewModel: ViewModel() {
     private val _user = MutableLiveData<Usuari>()
     val user: LiveData<Usuari> = _user
 
+    private val _reservations = MutableLiveData<List<Reserva>>()
+    val reservations: LiveData<List<Reserva>> = _reservations
     fun login(username: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
             var foundUser: Usuari? = null
@@ -28,6 +30,26 @@ class ViewModel: ViewModel() {
 
             withContext(Dispatchers.Main) {
                 _user.value = foundUser
+            }
+        }
+    }
+
+    fun getReservations() {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (user.value == null) {return@launch}
+
+            var foundReservations: List<Reserva>? = null
+
+            try {
+                foundReservations = API.API().getReservations(user.value!!.id!!).body()
+            } catch(exception: Exception) {}
+
+            if (foundReservations == null) {
+                return@launch
+            }
+
+            withContext(Dispatchers.Main) {
+                _reservations.value = foundReservations
             }
         }
     }

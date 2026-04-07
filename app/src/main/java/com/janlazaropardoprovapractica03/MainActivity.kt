@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
     private val viewModel: ViewModel by viewModels()
@@ -40,5 +43,23 @@ class MainActivity : AppCompatActivity() {
 
     fun reservationsBehavior() {
         setContentView(R.layout.activity_reserves)
+
+        val reservationsRecyclerView = findViewById<RecyclerView>(R.id.rvReserves)
+
+        reservationsRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        val reservationsRecyclerViewAdapter = RecyclerViewAdapter(
+            reservations = viewModel.reservations.value ?: mutableListOf()
+        )
+
+        reservationsRecyclerView.adapter = reservationsRecyclerViewAdapter
+
+        viewModel.reservations.observe(this) {
+            Log.d("Reservations", viewModel.reservations.value!!.toString())
+
+            reservationsRecyclerViewAdapter.updateList(viewModel.reservations.value)
+        }
+
+        viewModel.getReservations()
     }
 }
