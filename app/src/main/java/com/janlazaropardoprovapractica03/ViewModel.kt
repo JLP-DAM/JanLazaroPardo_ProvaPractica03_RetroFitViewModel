@@ -1,0 +1,34 @@
+package com.janlazaropardoprovapractica03
+
+import android.util.Log
+import android.widget.Toast
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class ViewModel: ViewModel() {
+    private val _user = MutableLiveData<Usuari>()
+    val user: LiveData<Usuari> = _user
+
+    fun login(username: String, password: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            var foundUser: Usuari? = null
+
+            try {
+                foundUser = API.API().login(Usuari(null, username, null, password)).body()
+            } catch(exception: Exception) {}
+
+            if (foundUser == null) {
+                return@launch
+            }
+
+            withContext(Dispatchers.Main) {
+                _user.value = foundUser
+            }
+        }
+    }
+}
